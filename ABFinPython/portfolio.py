@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import instrument as inst
+import ABFinPython.instrument as inst
 
 """Portfolio.py: Arion bank asset holding portfolio."""
 
@@ -9,7 +9,7 @@ __copyright__   = "Copyright 2014, Arion Bank"
 
 class Portfolio:
     """Portfolio class
-
+    
     Attributes:
         portfolioID: The ID of the portfolio as defined in VBR (safnID).
         assets: A list of Holding instances which hold an asset and the nominal value contained in the portfolio.
@@ -44,7 +44,7 @@ class Portfolio:
 
 class Holding:
     """Portfolio Holding class
-
+    
     Attributes
         asset: A instance of the instrument class.
         nominal: The nominal amount of the asset (can also be a weight if it is less than 1).
