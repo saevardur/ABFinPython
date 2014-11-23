@@ -10,7 +10,7 @@ def getLibraAudkenni(flokkurID):
     'Get audkenni from flokkurID'
     conn = pymssql.connect(host='dbDeli',database='VBR')
     cur = conn.cursor()
-    query = 'SELECT audkenni FROM Flokkur WHERE FlokkurID = ' + flokkurID
+    query = 'SELECT audkenni FROM Flokkur WHERE FlokkurID = ' + str(flokkurID)
     cur.execute(query)
 
     for row in cur:
@@ -24,6 +24,18 @@ def getLibraFlokkurID(audkenni):
     conn = pymssql.connect(host='dbDeli',database='VBR')
     cur = conn.cursor()
     query = "SELECT flokkurID FROM Flokkur WHERE audkenni = '" + audkenni + "'"
+    cur.execute(query)
+
+    for row in cur:
+        return row[0]
+
+    conn.close()
+
+def getLibraHeiti(flokkurID):
+    'Get heiti from flokkurID'
+    conn = pymssql.connect(host='dbDeli',database='VBR')
+    cur = conn.cursor()
+    query = 'SELECT heiti FROM Flokkur WHERE FlokkurID = ' + str(flokkurID)
     cur.execute(query)
 
     for row in cur:
@@ -84,7 +96,7 @@ def getLibraPriceSeries(flokkurID, dateFrom, dateTo):
         dateTo = dt.date.today()
 
     if dateFrom == None:
-        dateFrom = dt.date(year = 1900)
+        dateFrom = dt.date(year = 1900, month = 1, day = 1)
 
     # want only one value for each day!
 
@@ -93,3 +105,37 @@ def getLibraPriceSeries(flokkurID, dateFrom, dateTo):
 
 def getQuandlPriceSeries(ticker, dateFrom, dateTo):
     return q.get('GOOG/ICE_ICEAIR')
+
+def getPortfolioHoldings(portfolioID,date):
+    'Get portfolio holdings for portfolio with portfolioID on date.'
+
+    if date == dt.date.today():
+        date = date - dt.timedelta(hours=24)
+
+    conn = pymssql.connect(host='dbDeli',database='Performance')
+    cur = conn.cursor()
+    query = "SELECT flokkurID, Nafnvirdi FROM PortfolioHoldings WHERE safnID = " + str(portfolioID) + " AND dagsetning = '" + str(date) + "'"
+    cur.execute(query)
+
+    return cur.fetchall()
+
+    conn.close()
+    #return psql.read_sql("SELECT flokkurID, Nafnvirdi FROM PortfolioHoldings WHERE safnID = " + str(portfolioID) + " AND dagsetning = '" + str(date) + "'",conn)
+
+def getPortfolioHoldingsMarketValue(portfolioID,date):
+    'Get portfolio holdings for portfolio with portfolioID on date.'
+
+    if date == dt.date.today():
+        date = date - dt.timedelta(hours=24)
+
+    conn = pymssql.connect(host='dbDeli',database='Performance')
+    return psql.read_sql("SELECT flokkurID, Mvirdi FROM PortfolioHoldings WHERE safnID = " + str(portfolioID) + " AND dagsetning = '" + str(date) + "'",conn)
+
+def getPortfolioTotalValue(portfolioID,date):
+    'Get portfolio holdings for portfolio with portfolioID on date.'
+
+    if date == dt.date.today():
+        date = date - dt.timedelta(hours=24)
+
+    conn = pymssql.connect(host='dbDeli',database='Performance')
+    return psql.read_sql("SELECT Mvirdi FROM TotalHoldings WHERE safnID = " + str(portfolioID) + " AND dagsetning = '" + str(date) + "'",conn)

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import ABFinPython.instrument as inst
+import ABFinPython.dataaccess as da
+import pandas as pd
+import datetime as dt
 
 """Portfolio.py: Arion bank asset holding portfolio."""
 
@@ -14,33 +17,45 @@ class Portfolio:
         portfolioID: The ID of the portfolio as defined in VBR (safnID).
         assets: A list of Holding instances which hold an asset and the nominal value contained in the portfolio.
     """
-    portfolioID = null
-    weightsPortfolio = false
-    assets = null
+    portfolioID = 0
+    weightsPortfolio = False
+    assets = []
 
-	def __init__(self):
-		'Init null portfolio'
+    def __init__(self,pID=0):
+        'Init portfolio with portfolioID'
 
-	def __init__(self,pID):
-		'Init empty portfolio'
+        if (pID > 0):
+            self.portfolioID = pID
+            self.instantiatePortfolioFromPortfolioID()
 
-		self.portfolioID = pID
+    def instantiatePortfolioFromPortfolioID(self):
+        'Create a portfolio using the portfolioID. Get assets and nominal amount from PortfolioHoldings database. Default date is today (end of yesterday).'
 
-	def addAsset(flokkurID,nominal):
-		'Add a single asset to the portfolio'
-        if (nominal < 1):
+        #self.assets = da.getPortfolioHoldings(self.portfolioID,dt.date.today())
+        holdings = da.getPortfolioHoldings(self.portfolioID,dt.date.today())
+
+        for row in holdings:
+            self.addAsset(row[0],row[1])
+
+    def addAsset(self,flokkurID,nominal):
+        'Add a single asset to the portfolio'
+        if (nominal < 1.0):
             # If nominal is less we assume it refers to the percentage weight.
-            self.weightsPortfolio = true
-            self.assets.append(Holding(flokkurID,nominal))
+            self.weightsPortfolio = True
 
-	def addAssets(assets):
-		'Add a list of assets to the portfolio'
+        self.assets.append(Holding(flokkurID,nominal))
 
-    def calculateMarketValue(date):
-		'Calculate portfolio market value on a date. Default date is today'
+    def addAssets(self,assets):
+        'Add a list of assets to the portfolio'
 
-    def calculateReturns(date):
-        'Calculate portfolio returns on a date. Default date is today'
+    def calculateMarketValue(self,date):
+        'Calculate portfolio market value on a date. Default date is today (end of yesterday).'
+
+    def calculateReturns(self,dateFrom,dateTo):
+        'Calculate portfolio returnse. Default to date is today (end of yesterday), default from date is the first day of the portfolio.'
+
+    def simulatePortfolio(self):
+        'Simulate portfolio value into the future.'
 
 class Holding:
     """Portfolio Holding class
@@ -50,22 +65,22 @@ class Holding:
         nominal: The nominal amount of the asset (can also be a weight if it is less than 1).
         buyYield: The yield at which the asset was bought.
     """
-    asset = null
-    nominal = null
-    buyYield = null
+    asset = None
+    nominal = 0
+    buyYield = 0
 
     def __init__(self):
-		'Init null holding'
+        'Init null holding'
 
-	def __init__(self,flokkurID,nominal=0):
-		'Init holding with instrument'
+    def __init__(self,flokkurID,nominal=0):
+        'Init holding with instrument'
         self.asset = inst.Instrument(flokkurID)
         self.nominal = nominal
 
-    def calculateMarketValue(date):
+    def calculateMarketValue(self,date):
         'Calculate market value of holding on date. (Only works if working with nominal amount)'
         return nominal * self.asset.getClosingPrice(date)
 
-    def calculateReturns(date):
+    def calculateReturns(self,date):
         'Calculate holding returns on a date. Default date is today'
         # get straight from instrument
